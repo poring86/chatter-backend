@@ -1,0 +1,28 @@
+{
+    "name": "@types/migrate-mongo",
+    "version": "10.0.5",
+    "description": "TypeScript definitions for migrate-mongo",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/migrate-mongo",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Amit Beckenstein",
+            "githubUsername": "amitbeck",
+            "url": "https://github.com/amitbeck"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/migrate-mongo"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/node": "*",
+        "mongodb": "^6.1.0"
+    },
+    "typesPublisherContentHash": "1f5c08926a34e977fe11f16b3a19c3fbb82018915cecd1c2437663557d234a5a",
+    "typeScriptVersion": "4.8"
+}

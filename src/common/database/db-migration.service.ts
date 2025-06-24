@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { config, database, up } from 'migrate-mongo';
+import path from 'path';
 
 @Injectable()
 export class DbMigrationService implements OnModuleInit {
@@ -12,7 +13,7 @@ export class DbMigrationService implements OnModuleInit {
         databaseName: this.configService.getOrThrow<string>('DB_NAME'),
         url: this.configService.getOrThrow<string>('MONGODB_URI'),
       },
-      migrationsDir: `${__dirname}/../../migrations`,
+       migrationsDir: path.join(process.cwd(), 'src/migrations'),
       changelogCollectionName: 'changelog',
       migrationFileExtension: '.js',
     };
