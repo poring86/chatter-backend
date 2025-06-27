@@ -31,7 +31,9 @@ export class AuthService {
     const token = await this.jwtService.signAsync(tokenPayload);
 
     response.cookie('Authentication', token, {
-      httpOnly: true,
+      httpOnly: true, // Segurança: impede acesso via JavaScript
+      secure: process.env.NODE_ENV === 'production', // HTTPS only em produção
+      sameSite: 'none', // ou 'none' se usar domínios diferentes + HTTPS
       expires,
     });
   }
