@@ -12,29 +12,29 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async login(user: User, response: Response): Promise<void> {
+  async login(user: User, response: Response) {
     const expires = new Date();
-
-    // Converte a variável de ambiente para número de forma segura
-    const jwtExpiration = Number(
-      this.configService.getOrThrow('JWT_EXPIRATION'),
+    expires.setSeconds(
+      expires.getSeconds() + this.configService.getOrThrow('JWT_EXPIRATION'),
     );
-
-    expires.setSeconds(expires.getSeconds() + jwtExpiration);
 
     const tokenPayload: TokenPayload = {
       _id: user._id.toHexString(),
       email: user.email,
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const token = await this.jwtService.signAsync(tokenPayload);
+    const token = this.jwtService.sign(tokenPayload);
 
     response.cookie('Authentication', token, {
-      httpOnly: true, // Segurança: impede acesso via JavaScript
-      secure: process.env.NODE_ENV === 'production', // HTTPS only em produção
-      sameSite: 'none', // ou 'none' se usar domínios diferentes + HTTPS
+      httpOnly: true,
       expires,
+    });
+  }
+
+  logout(response: Response) {
+    response.cookie('Authentication', '', {
+      httpOnly: true,
+      expires: new Date(),
     });
   }
 }

@@ -13,10 +13,9 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
   async validate(email: string, password: string) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return await this.usersService.verifyUser(email, password);
     } catch (err) {
-      throw new UnauthorizedException(err);
+      throw new UnauthorizedException('Credentials are not valid.');
     }
   }
 }
