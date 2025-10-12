@@ -12,11 +12,13 @@ export class ChatsService {
       ...createChatInput,
       userId,
       userIds: createChatInput.userIds || [],
+      message: [],
     });
   }
 
   async findAll() {
-    return this.chatsRepository.find({});
+    const chats = await this.chatsRepository.find({});
+    return chats ?? [];
   }
 
   async findOne(_id: string) {
