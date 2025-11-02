@@ -23,7 +23,7 @@ export class Chat extends AbstractEntity {
   name?: string;
 
   @Prop([Message])
-  message: Message[];
+  messages: Message[];
 }
 
 export const ChatSchema = SchemaFactory.createForClass(Chat);
