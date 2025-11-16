@@ -57,6 +57,6 @@ export class MessagesService {
       _id: chatId,
       ...this.chatsService.userChatFilter(userId),
     });
-    return this.pubSub.asyncIterableIterator(MESSAGE_CREATED);
+    return this.pubSub.asyncIterator(MESSAGE_CREATED);
   }
 }

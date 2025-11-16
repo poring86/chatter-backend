@@ -49,8 +49,6 @@ export class MessagesResolver {
     @Args() messageCreatedArgs: MessageCreatedArgs,
     @CurrentUser() user: TokenPayload,
   ) {
-    console.log('messageCreated');
-    console.log('user', user);
     return this.messagesService.messageCreated(messageCreatedArgs, user._id);
   }
 }

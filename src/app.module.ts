@@ -10,8 +10,9 @@ import { UsersModule } from './users/users.module';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
 import { ChatsModule } from './chats/chats.module';
-import { AuthService } from './auth/auth.service';
 import { PubSubModule } from './common/pubsub/pubsub.module';
+import { Request } from 'express';
+import { AuthService } from './auth/auth.service';
 
 @Module({
   imports: [
@@ -29,40 +30,17 @@ import { PubSubModule } from './common/pubsub/pubsub.module';
           'graphql-ws': {
             onConnect: (context: any) => {
               try {
-                // 1. O token é enviado no 'connectionParams' pelo cliente WS
-                const authHeader = context.connectionParams?.Authorization;
-
-                if (!authHeader) {
-                  throw new UnauthorizedException(
-                    'Token de conexão não encontrado.',
-                  );
-                }
-
-                // 2. Cria um objeto simulado de Request
-                // O authService.verifyWs espera um objeto com a estrutura { headers: { authorization: 'Bearer token' } }
-                const simulatedRequest = {
-                  headers: {
-                    authorization: authHeader,
-                  },
-                } as any;
-
-                // 3. Verifica o token e obtém o payload do usuário
-                const user = authService.verifyWs(simulatedRequest);
-
-                // Retorna o objeto de contexto que será usado nos Resolvers de Subscription
-                return { user: user };
+                const request: Request = context.extra.request;
+                const user = authService.verifyWs(request);
+                context.user = user;
               } catch (err) {
                 new Logger().error(err);
-                // Lança uma exceção para abortar a conexão WebSocket
-                throw new UnauthorizedException(
-                  'Autenticação de WebSocket falhou.',
-                );
+                throw new UnauthorizedException();
               }
             },
           },
         },
       }),
-      // Importa e injeta o AuthService, garantindo que ele esteja disponível
       imports: [AuthModule],
       inject: [AuthService],
     }),
