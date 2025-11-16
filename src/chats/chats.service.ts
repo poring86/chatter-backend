@@ -16,13 +16,28 @@ export class ChatsService {
     });
   }
 
-  async findAll() {
-    const chats = await this.chatsRepository.find({});
-    return chats ?? [];
+  async findAll(userId: string) {
+    return this.chatsRepository.find({
+      ...this.userChatFilter(userId),
+    });
   }
 
   async findOne(_id: string) {
     return this.chatsRepository.findOne({ _id });
+  }
+
+  userChatFilter(userId: string) {
+    return {
+      $or: [
+        { userId },
+        {
+          userIds: {
+            $in: [userId],
+          },
+        },
+        { isPrivate: false },
+      ],
+    };
   }
 
   update(id: number, updateChatInput: UpdateChatInput) {

@@ -4,7 +4,7 @@ import { AbstractEntity } from '../../../common/database/abstract.entity';
 
 @ObjectType()
 @Schema()
-export class Message extends AbstractEntity {
+export class MessageDocument extends AbstractEntity {
   @Field()
   @Prop()
   content: string;
