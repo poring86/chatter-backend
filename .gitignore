@@ -4,6 +4,7 @@
 /build
 .env
 /.pnpm-store
+/uploads
 
 # Logs
 logs

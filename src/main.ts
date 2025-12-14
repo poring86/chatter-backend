@@ -6,11 +6,14 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, { bufferLogs: true, cors: true });
   app.useGlobalPipes(new ValidationPipe());
   app.useLogger(app.get(Logger));
   app.use(cookieParser());
   const configService = app.get(ConfigService);
-  await app.listen(configService.getOrThrow('PORT'));
+  const port = configService.getOrThrow('PORT');
+  await app.listen(port);
+  console.log(`Server running on port ${port}`);
+  console.log(`Current working directory: ${process.cwd()}`);
 }
 bootstrap();
