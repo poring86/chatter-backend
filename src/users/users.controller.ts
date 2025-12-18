@@ -1,4 +1,5 @@
 import {
+  BadRequestException, // Adicionado para validação manual básica
   Controller,
   FileTypeValidator,
   MaxFileSizeValidator,
@@ -22,10 +23,13 @@ export class UsersController {
   @Post('image')
   @UseInterceptors(FileInterceptor('file'))
   async uploadProfilePicture(
+    // 💡 O @UploadedFile() é o que "pega" o arquivo do interceptor
     @UploadedFile(
       new ParseFilePipe({
         validators: [
+          // 100KB - Se sua imagem for maior, aumente este valor
           new MaxFileSizeValidator({ maxSize: 100000 }),
+          // Permite JPEG/JPG
           new FileTypeValidator({ fileType: 'image/jpeg' }),
         ],
       }),
@@ -33,6 +37,21 @@ export class UsersController {
     file: Express.Multer.File,
     @CurrentUser() user: TokenPayload,
   ) {
-    return this.usersService.uploadImage(file.buffer, user._id);
+    // Verificação extra de segurança
+    if (!file || !file.buffer) {
+      throw new BadRequestException('Arquivo não enviado corretamente.');
+    }
+
+    // 1. Chama o Service e recebe o objeto User COMPLETO e atualizado
+    const updatedUser = await this.usersService.uploadImage(
+      file.buffer,
+      user._id,
+    );
+
+    // 2. Retorna o JSON formatado que o Frontend (res.json()) espera
+    return {
+      message: 'Profile picture uploaded successfully.',
+      user: updatedUser,
+    };
   }
 }

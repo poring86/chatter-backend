@@ -1,98 +1,137 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 💬 Chatter Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+[![Nest Logo](https://img.shields.io/badge/NestJS-4C5A96?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/npm/l/@nestjs/core.svg)](https://github.com/poring86/chatter-backend/blob/master/LICENSE)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🌟 Visão Geral do Projeto
 
-## Description
+Este repositório contém o **backend** robusto e escalável para a aplicação de chat em tempo real **Chatter**. Ele gerencia toda a lógica de negócio, a persistência de dados no MongoDB e a comunicação em tempo real via WebSockets.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+O projeto faz parte de uma arquitetura Full Stack que se conecta com o frontend:
+👉 **[chatter-ui](https://github.com/poring86/chatter-ui)** (Interface de usuário construída com React e TypeScript).
 
-## Project setup
+---
 
-```bash
-$ pnpm install
-```
+## 🏛️ Funcionamento Detalhado da Aplicação
 
-## Compile and run the project
+### 1. Sistema de Persistência (Mongoose & MongoDB)
 
-```bash
-# development
-$ pnpm run start
+O projeto utiliza o **Mongoose** como ODM (Object Data Modeling) para interagir com o banco de dados **MongoDB**. Isso permite modelar esquemas de dados de forma organizada, utilizando recursos como _Aggregation Pipelines_ para consultas complexas (evidenciado no código do `ChatsService`).
 
-# watch mode
-$ pnpm run start:dev
+#### Estrutura de Modelos Chave
 
-# production mode
-$ pnpm run start:prod
-```
+| Modelo (Entidade) | Descrição                                                    | Relações Chave                                                  |
+| :---------------- | :----------------------------------------------------------- | :-------------------------------------------------------------- |
+| **User**          | Armazena dados do usuário (ID, nome de usuário, senha hash). | Relacionado a **Message** (autor)                               |
+| **Message**       | Armazena o conteúdo, autor e timestamp de cada mensagem.     | Relacionado a **User** (autor)                                  |
+| **Chat/Room**     | Gerencia as conversas ou salas de chat.                      | Contém referências/subdocumentos para **Messages** e **Users**. |
 
-## Run tests
+### 2. Autenticação (JWT)
 
-```bash
-# unit tests
-$ pnpm run test
+A autenticação é baseada em JWT (JSON Web Token), implementada com **Passport.js** no NestJS. O JWT é obrigatório para acessar rotas REST protegidas e essencial para a conexão WebSocket.
 
-# e2e tests
-$ pnpm run test:e2e
+### 3. Comunicação em Tempo Real (WebSockets)
 
-# test coverage
-$ pnpm run test:cov
-```
+A funcionalidade de chat em tempo real é fornecida por um **Gateway WebSocket** NestJS.
 
-## Deployment
+| Fluxo       | Evento Principal | Descrição do Processo                                                                                                                   |
+| :---------- | :--------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| **Conexão** | `connection`     | O backend realiza a validação do JWT enviado pelo cliente antes de estabelecer a conexão persistente.                                   |
+| **Envio**   | `message:send`   | O Gateway salva a mensagem no MongoDB e utiliza _broadcasting_ para retransmiti-la imediatamente para todos os clientes ativos na sala. |
+| **Status**  | `user:status`    | Notificação em tempo real sobre usuários entrando ou saindo da sala de chat.                                                            |
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## 🚀 Stack de Tecnologia
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+| Categoria           | Tecnologia            | Detalhes                                              |
+| :------------------ | :-------------------- | :---------------------------------------------------- |
+| **Framework**       | **NestJS**            | Padrão modular e arquitetura escalável.               |
+| **Banco de Dados**  | **MongoDB**           | NoSQL de alta performance.                            |
+| **ORM/ODM**         | **Mongoose**          | Camada de modelagem de dados e esquemas para MongoDB. |
+| **Containerização** | **Docker**            | Isolamento e portabilidade do ambiente de execução.   |
+| **Linguagem**       | **TypeScript**        | Forte tipagem.                                        |
+| **Auth**            | **Passport.js (JWT)** | Estratégias de autenticação.                          |
+| **Comunicação**     | **WebSockets**        | Comunicação bidirecional em tempo real.               |
+| **Gerenciador**     | **pnpm**              |                                                       |
 
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
+---
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## ⚙️ Instruções de Setup
 
-## Resources
+Para rodar a aplicação Full Stack, você precisa ter o backend e o frontend em execução.
 
-Check out a few resources that may come in handy when working with NestJS:
+### 🛠️ Pré-requisitos
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+- **Docker** e **Docker Compose** (Opção preferencial para ambiente completo)
+- **Node.js** (v18+), **pnpm** e **Yarn** (Opção manual)
 
-## Support
+### 1. Configurar o Backend com pnpm (Desenvolvimento Local)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Esta opção é ideal se você deseja rodar o backend localmente com _hot reload_ e seu banco de dados (MongoDB) já está instalado e acessível.
 
-## Stay in touch
+1.  **Clonar e Instalar Dependências:**
+    ```bash
+    git clone [https://github.com/poring86/chatter-backend.git](https://github.com/poring86/chatter-backend.git)
+    cd chatter-backend
+    pnpm install
+    ```
+2.  **Configurar Variáveis de Ambiente (`.env`):**
+    Crie o arquivo `.env` na raiz. A porta `3001` é recomendada para evitar conflito com o frontend (porta `3000`).
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+    ```bash
+    # .env file
+    PORT=3001
+    DATABASE_URL="mongodb://localhost:27017/chatterdb"
+    JWT_SECRET="sua_chave_secreta_aqui"
+    ```
 
-## License
+3.  **Iniciar o Backend (com Hot Reload):**
+    ```bash
+    pnpm run start:dev
+    # Servidor rodando em http://localhost:3001
+    ```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### 2. Configurar o Backend com Docker Compose (Ambiente Isolado)
+
+Use o Docker para construir e rodar o servidor, idealmente junto com o container do MongoDB.
+
+1.  **Clonar e Configurar `.env`** (passos 1 e 2 da seção anterior).
+2.  **Construir e Iniciar os Containers:**
+    ```bash
+    docker-compose up --build
+    # O backend estará disponível em http://localhost:3001
+    ```
+
+### 3. Configurar e Iniciar o Frontend (chatter-ui)
+
+1.  **Clonar e Instalar (em outro terminal):**
+    ```bash
+    cd ..
+    git clone [https://github.com/poring86/chatter-ui.git](https://github.com/poring86/chatter-ui.git)
+    cd chatter-ui
+    yarn install
+    ```
+2.  **Configurar Conexão no Frontend:**
+    Certifique-se de que o frontend está apontando para a porta `3001` do backend.
+
+    ```bash
+    # Exemplo de configuração de variáveis de ambiente no frontend (geralmente .env.local)
+    REACT_APP_API_URL=http://localhost:3001
+    REACT_APP_WS_URL=ws://localhost:3001/chat
+    ```
+
+3.  **Iniciar o Frontend:**
+    ```bash
+    yarn start
+    # Frontend rodando em http://localhost:3000
+    ```
+
+## 🤝 Contribuições
+
+Contribuições, sugestões e relatórios de bugs são sempre bem-vindos.
+
+## 📄 Licença
+
+Este projeto está sob a licença [MIT](https://github.com/poring86/chatter-backend/blob/master/LICENSE).

@@ -29,26 +29,36 @@ export class UsersService {
     return this.toEntity(user);
   }
 
-  async uploadImage(file: Buffer, userId: string) {
+  async uploadImage(file: Buffer, userId: string): Promise<User> {
     try {
+      console.log('--- START: uploadImage for userId:', userId); // 💡 NOVO LOG 1
+
       const key = `${userId}.jpg`;
       await this.localStorageService.upload({
         bucket: 'chatter-user-images',
         key,
         file,
       });
+      console.log('--- STEP 1: LocalStorageService.upload finished.'); // 💡 NOVO LOG 2
+
       const imageUrl = this.localStorageService.getObjectUrl(key);
-      await this.usersRepository.findOneAndUpdate(
+
+      const userDocument = await this.usersRepository.findOneAndUpdate(
         { _id: userId },
-        {
-          $set: {
-            imageUrl,
-          },
-        },
+        { $set: { imageUrl } },
       );
-      return imageUrl;
+      console.log('--- STEP 2: findOneAndUpdate finished.'); // 💡 NOVO LOG 3
+
+      if (!userDocument) {
+        console.error('--- ERROR: User document not found after update.'); // 💡 NOVO LOG 4
+        throw new NotFoundException('User not found during image update.');
+      }
+
+      const userEntity = this.toEntity(userDocument);
+      console.log('--- STEP 3: toEntity finished. Returning user.'); // 💡 NOVO LOG 5
+      return userEntity;
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('--- FINAL ERROR IN SERVICE:', error); // 💡 LOG DE ERRO CATCH
       throw error;
     }
   }
@@ -101,8 +111,15 @@ export class UsersService {
   toEntity(userDocument: UserDocument): User {
     let imageUrl = userDocument.imageUrl;
     const port = this.configService.get('PORT');
-    
-    console.log('toEntity processing user:', userDocument._id, 'imageUrl:', imageUrl, 'PORT:', port);
+
+    console.log(
+      'toEntity processing user:',
+      userDocument._id,
+      'imageUrl:',
+      imageUrl,
+      'PORT:',
+      port,
+    );
 
     if (imageUrl && imageUrl.includes('localhost:3001')) {
       console.log('Replacing stale port 3001 with', port);
