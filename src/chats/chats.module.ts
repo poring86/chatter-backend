@@ -8,6 +8,7 @@ import { MessagesModule } from './messages/messages.module';
 import { ChatSchema } from './entities/chat.document';
 import { ChatsController } from './chats.controller';
 import { UsersModule } from '../users/users.module';
+import { ChatsGateway } from './chats.gateway';
 
 @Module({
   imports: [
@@ -15,8 +16,12 @@ import { UsersModule } from '../users/users.module';
     DatabaseModule.forFeature([{ name: Chat.name, schema: ChatSchema }]),
     forwardRef(() => MessagesModule),
   ],
-  providers: [ChatsResolver, ChatsService, ChatsRepository],
-  exports: [ChatsRepository],
+  providers: [ChatsResolver, ChatsService, ChatsRepository, ChatsGateway],
+  exports: [ChatsRepository, ChatsGateway],
   controllers: [ChatsController],
 })
-export class ChatsModule {}
+export class ChatsModule {
+  constructor() {
+    console.log('ChatsModule initialized');
+  }
+}

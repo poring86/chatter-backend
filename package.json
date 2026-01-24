@@ -31,7 +31,9 @@
     "@nestjs/mongoose": "^10.0.6",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.3.7",
+    "@nestjs/platform-socket.io": "^10.4.22",
     "@nestjs/serve-static": "^5.0.4",
+    "@nestjs/websockets": "^10.4.22",
     "@types/multer": "^2.0.0",
     "bcryptjs": "^3.0.3",
     "class-transformer": "^0.5.1",
@@ -51,7 +53,8 @@
     "pino-http": "^9.0.0",
     "pino-pretty": "^11.0.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.3.2",

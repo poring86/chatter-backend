@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ChatsRepository } from '../chats.repository';
+import { ChatsGateway } from '../chats.gateway';
 import { CreateMessageInput } from './dto/create-message.input';
 import { Message } from './entities/message.entity';
 import { Types } from 'mongoose';
@@ -16,6 +17,7 @@ export class MessagesService {
     private readonly chatsRepository: ChatsRepository,
     private readonly usersService: UsersService,
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
+    private readonly chatsGateway: ChatsGateway,
   ) {}
 
   async createMessage({ content, chatId }: CreateMessageInput, userId: string) {
@@ -43,17 +45,17 @@ export class MessagesService {
     await this.pubSub.publish(MESSAGE_CREATED, {
       messageCreated: message,
     });
+    this.chatsGateway.emitMessage(message);
     return message;
   }
 
   async countMessages(chatId: string) {
-    return (
-      await this.chatsRepository.model.aggregate([
-        { $match: { _id: new Types.ObjectId(chatId) } },
-        { $unwind: '$messages' },
-        { $count: 'messages' },
-      ])
-    )[0];
+    const res = await this.chatsRepository.model.aggregate([
+      { $match: { _id: new Types.ObjectId(chatId) } },
+      { $unwind: '$messages' },
+      { $count: 'messages' },
+    ]);
+    return res[0] || { messages: 0 };
   }
 
   async getMessages({ chatId, skip, limit }: GetMessagesArgs) {
