@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ChatsRepository } from '../chats.repository';
-import { ChatsGateway } from '../chats.gateway';
 import { CreateMessageInput } from './dto/create-message.input';
 import { Message } from './entities/message.entity';
 import { Types } from 'mongoose';
@@ -17,7 +16,6 @@ export class MessagesService {
     private readonly chatsRepository: ChatsRepository,
     private readonly usersService: UsersService,
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
-    private readonly chatsGateway: ChatsGateway,
   ) {}
 
   async createMessage({ content, chatId }: CreateMessageInput, userId: string) {
@@ -45,7 +43,6 @@ export class MessagesService {
     await this.pubSub.publish(MESSAGE_CREATED, {
       messageCreated: message,
     });
-    this.chatsGateway.emitMessage(message);
     return message;
   }
 

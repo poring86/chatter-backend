@@ -20,7 +20,8 @@ services:
     ports:
       - "3333:3333"
     environment:
-      MONGO_URI: mongodb://root:example@mongodb:27017/
+      MONGODB_URI: mongodb://root:example@mongodb:27017/admin
+      DB_NAME: chatter
     depends_on:
       - mongodb
     volumes:
